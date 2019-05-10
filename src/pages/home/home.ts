@@ -28,6 +28,20 @@ export class HomePage {
       error => {});
   }
 
+  signup() {
+    console.log('passou aqui');
+    this.navCtrl.push('SignupPage');
+  }
+
+  ionViewDidEnter() {
+    this.auth.refreshToken()
+      .subscribe(response => {
+        this.auth.successfullLogin(response.headers.get('Authorization'));
+        this.navCtrl.setRoot('CategoriasPage');
+      },
+      error => {});
+  }
+
   ionViewWillEnter() {
     this.menu.swipeEnable(false);
   }
