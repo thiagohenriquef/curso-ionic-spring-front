@@ -27,4 +27,8 @@ export class CategoriasPage {
         this.items = response;
       }, error => {});
   }
+
+  showProdutos(categoria_id : string) {
+    this.navCtrl.push('ProdutosPage', { categoria_id });
+  }
 }
