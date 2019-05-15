@@ -28,11 +28,67 @@ export class CartService {
 
     addProduto(produto: ProdutoDTO) : Cart {
         const cart = this.getCart();
-        const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+        if (cart && cart.itens) {
+            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+        } else {
+            const position = -1;
+        }
         if (position == -1) {
             cart.itens.push({ quantidade: 1, produto: produto});
         }
         this.storage.setCart(cart);
         return cart;
+    }
+
+    removeProduto(produto: ProdutoDTO) : Cart {
+        const cart = this.getCart();
+        if (cart && cart.itens) {
+            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+        } else {
+            const position = -1;
+        }
+        if (position != -1) {
+            cart.itens.splice(position);
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    increaseQuantity(produto: ProdutoDTO) : Cart {
+        const cart = this.getCart();
+        if (cart && cart.itens) {
+            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+        } else {
+            const position = -1;
+        }
+        if (position != -1) {
+            cart.itens[position].quantidade++;
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    decreaseQuantity(produto: ProdutoDTO) : Cart {
+        let cart = this.getCart();
+        if (cart && cart.itens) {
+            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+        } else {
+            const position = -1;
+        }
+        if (position != -1) {
+            cart.itens[position].quantidade--;
+            if (cart.itens[position].quantidade < 1) {
+                cart = this.removeProduto(produto);
+            }
+        }
+        this.storage.setCart(cart);
+        return cart;
+    }
+
+    total() : number {
+        const cart = this.getCart();
+        return cart && cart.itens
+            ? cart.itens.reduce((acc, curr) => acc + (curr.produto.preco * curr.quantidade), 0)
+            : 0
     }
 }
