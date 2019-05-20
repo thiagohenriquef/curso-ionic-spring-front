@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { PedidoDTO } from '../../models/pedido.dto';
 import { CartItem } from '../../models/cart-item';
 import { CartService } from '../../services/domain/cart.service';
@@ -26,6 +26,7 @@ export class OrderConfirmationPage {
   cartItems: CartItem[];
   cliente: ClienteDTO;
   endereco: EnderecoDTO;
+  codPedido: string;
 
   constructor(
     public navCtrl: NavController,
@@ -39,7 +40,6 @@ export class OrderConfirmationPage {
 
   ionViewDidLoad() {
     this.cartItems = this.cartService.getCart().itens;
-
     this.clienteService.findById(this.pedido.cliente.id)
       .subscribe(response => {
         this.cliente = response as ClienteDTO;
@@ -60,7 +60,7 @@ export class OrderConfirmationPage {
     this.pedidoService.insert(this.pedido)
       .subscribe(response => {
         this.cartService.createOrClearCart();
-        console.log(response.headers.get('location'));
+        this.codPedido = this.extractId(response.headers.get('location'));
       }, error => {
         if (error.status == 403) {
           this.navCtrl.setRoot('HomePage');
@@ -70,6 +70,15 @@ export class OrderConfirmationPage {
 
   back() {
     this.navCtrl.setRoot('CartPage');
+  }
+
+  home() {
+    this.navCtrl.setRoot('HomePage');
+  }
+
+  private extractId(location : string) {
+    const position = location.lastIndexOf('/');
+    return location.substring(position + 1, location.length);
   }
 
 }

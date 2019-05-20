@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, Item } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Item, LoadingController } from 'ionic-angular';
 import { ProdutoDTO } from '../../models/produto.dto';
 import { CategoriaService } from '../../services/domain/categoria.service';
 import { ProdutoService } from '../../services/domain/produto.service';
-import { ToggleGesture } from 'ionic-angular/umd/components/toggle/toggle-gesture';
 import { API_CONFIG } from '../../config/api.config';
 
 @IonicPage()
@@ -18,15 +17,20 @@ export class ProdutosPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public produtoService : ProdutoService) {
+    public produtoService : ProdutoService,
+    public loadingCtrl: LoadingController) {
   }
 
   ionViewDidLoad() {
+    const loader = this.presentLoading();
     this.produtoService.findByCategoria(this.navParams.get('categoria_id'))
       .subscribe(resp => {
         this.items = resp['content'];
+        loader.dismiss();
         this.updateImages();
-      }, error => {})
+      }, error => {
+        loader.dismiss();
+      })
   }
 
   public updateImages() {
@@ -42,4 +46,11 @@ export class ProdutosPage {
     this.navCtrl.push('ProdutoDetailPage', { produtoId });
   }
 
+  presentLoading() {
+    const loader = this.loadingCtrl.create({
+      content: 'Aguarde...'
+    });
+    loader.present();
+    return loader;
+  }
 }
