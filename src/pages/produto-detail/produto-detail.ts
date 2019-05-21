@@ -21,7 +21,7 @@ export class ProdutoDetailPage {
     public cartService: CartService) {
   }
 
-  ionViewDidLoad() {
+  ionViewDidLoad() : void {
     this.produtoService.findById(this.navParams.get('produtoId'))
       .subscribe(resp => {
         this.item = resp;

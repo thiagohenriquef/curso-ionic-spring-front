@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, Item, LoadingController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { ProdutoDTO } from '../../models/produto.dto';
-import { CategoriaService } from '../../services/domain/categoria.service';
 import { ProdutoService } from '../../services/domain/produto.service';
 import { API_CONFIG } from '../../config/api.config';
 
@@ -12,7 +11,8 @@ import { API_CONFIG } from '../../config/api.config';
 })
 export class ProdutosPage {
 
-  items : ProdutoDTO[];
+  items : ProdutoDTO[] = [];
+  page: number = 0;
 
   constructor(
     public navCtrl: NavController,
@@ -22,23 +22,50 @@ export class ProdutosPage {
   }
 
   ionViewDidLoad() {
+    this.loadData();
+  }
+
+  loadData(refresher = null, infiniteScroll = null) {
     const loader = this.presentLoading();
-    this.produtoService.findByCategoria(this.navParams.get('categoria_id'))
+    this.produtoService.findByCategoria(this.navParams.get('categoria_id'), this.page, 10)
       .subscribe(resp => {
-        this.items = resp['content'];
+        const start = this.items.length;
+        this.items = this.items.concat(resp['content']);
+        const end = this.items.length - 1;
         loader.dismiss();
-        this.updateImages();
+        this.updateImages(start, end);
+        if (refresher) {
+          refresher.complete();
+        }
+        if (infiniteScroll) {
+          infiniteScroll.complete();
+        }
       }, error => {
         loader.dismiss();
+        if (refresher) {
+          refresher.complete();
+        }
+        if (infiniteScroll) {
+          infiniteScroll.complete();
+        }
       })
   }
 
-  public updateImages() {
-    this.items.forEach(el => {
-      this.produtoService.getSmallImageFromBucket(el.id)
+  doRefresh(refresher) {
+    this.items = [];
+    this.page = 0;
+    this.loadData(refresher);
+  }
+
+  public updateImages(start: number, end: number) {
+    for(let i = start; i < end; i++) {
+      const item = this.items[i];
+      this.produtoService.getSmallImageFromBucket(item.id)
         .subscribe(resp => {
-          el.imageURL = `${API_CONFIG.bucketBaseUrl}/prod${el.id}-small.jpg`;
+          item.imageURL = `${API_CONFIG.bucketBaseUrl}/prod${item.id}-small.jpg`;
         }, error => {});
+    }
+    this.items.forEach(el => {
     })
   }
 
@@ -52,5 +79,10 @@ export class ProdutosPage {
     });
     loader.present();
     return loader;
+  }
+
+  doInfinite(infiniteScroll) {
+    this.page++;
+    this.loadData(null, infiniteScroll);
   }
 }

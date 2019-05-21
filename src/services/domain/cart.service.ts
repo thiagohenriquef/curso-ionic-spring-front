@@ -28,12 +28,13 @@ export class CartService {
 
     addProduto(produto: ProdutoDTO) : Cart {
         const cart = this.getCart();
+        let pos;
         if (cart && cart.itens) {
-            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+            pos = cart.itens.findIndex(el => el.produto.id == produto.id);
         } else {
-            const position = -1;
+            pos = -1;
         }
-        if (position == -1) {
+        if (pos == -1) {
             cart.itens.push({ quantidade: 1, produto: produto});
         }
         this.storage.setCart(cart);
@@ -42,13 +43,14 @@ export class CartService {
 
     removeProduto(produto: ProdutoDTO) : Cart {
         const cart = this.getCart();
+        let pos;
         if (cart && cart.itens) {
-            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+            pos = cart.itens.findIndex(el => el.produto.id == produto.id);
         } else {
-            const position = -1;
+            pos = -1;
         }
-        if (position != -1) {
-            cart.itens.splice(position);
+        if (pos != -1) {
+            cart.itens.splice(pos);
         }
         this.storage.setCart(cart);
         return cart;
@@ -56,13 +58,14 @@ export class CartService {
 
     increaseQuantity(produto: ProdutoDTO) : Cart {
         const cart = this.getCart();
+        let pos;
         if (cart && cart.itens) {
-            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+            pos = cart.itens.findIndex(el => el.produto.id == produto.id);
         } else {
-            const position = -1;
+            pos = -1;
         }
-        if (position != -1) {
-            cart.itens[position].quantidade++;
+        if (pos != -1) {
+            cart.itens[pos].quantidade++;
         }
         this.storage.setCart(cart);
         return cart;
@@ -70,14 +73,15 @@ export class CartService {
 
     decreaseQuantity(produto: ProdutoDTO) : Cart {
         let cart = this.getCart();
+        let pos;
         if (cart && cart.itens) {
-            const position = cart.itens.findIndex(el => el.produto.id == produto.id);
+            pos = cart.itens.findIndex(el => el.produto.id == produto.id);
         } else {
-            const position = -1;
+            pos = -1;
         }
-        if (position != -1) {
-            cart.itens[position].quantidade--;
-            if (cart.itens[position].quantidade < 1) {
+        if (pos != -1) {
+            cart.itens[pos].quantidade--;
+            if (cart.itens[pos].quantidade < 1) {
                 cart = this.removeProduto(produto);
             }
         }
